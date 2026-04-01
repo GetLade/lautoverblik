@@ -1,7 +1,7 @@
 import OpenAI from 'openai'
 
 export function getLLMClient() {
-  const useNvidia = process.env.USE_NVIDIA === 'true'
+  const useNvidia = process.env.USE_NVIDIA?.toLowerCase() === 'true'
   return new OpenAI({
     baseURL: useNvidia
       ? 'https://integrate.api.nvidia.com/v1'
@@ -13,7 +13,7 @@ export function getLLMClient() {
 }
 
 export function getModel() {
-  const useNvidia = process.env.USE_NVIDIA === 'true'
+  const useNvidia = process.env.USE_NVIDIA?.toLowerCase() === 'true'
   return useNvidia
     ? 'meta/llama-3.3-70b-instruct'
     : 'meta-llama/llama-3.3-70b-instruct'

@@ -18,8 +18,8 @@ Internt produktivitets-dashboard til Lauto (AI-automatisering og webdev). Solo-p
 - **Sprog**: TypeScript overalt
 - **Styling**: Tailwind CSS + Framer Motion
 - **Database**: Supabase via `@supabase/ssr`
-- **LLM primær**: OpenRouter API (OpenAI-kompatibelt)
-- **LLM backup**: NVIDIA NIM (`USE_NVIDIA=TRUE` i .env.local)
+- **LLM primær**: Groq API (OpenAI-kompatibelt)
+- **LLM backup**: NVIDIA NIM (`USE_NVIDIA=true` i .env.local)
 
 ## Kommandoer
 ```bash
@@ -42,7 +42,7 @@ npm run type-check # TypeScript check (tsc --noEmit)
   /ui/                   # Nav
 /lib
   /supabase.ts           # Re-eksporterer getSupabase() fra utils/supabase/client
-  /llm.ts                # OpenRouter/NVIDIA klient
+  /llm.ts                # Groq/NVIDIA klient
 /utils/supabase/
   /client.ts             # createClient() – brug i 'use client'-komponenter
   /server.ts             # createClient() – brug i Server Components
@@ -62,7 +62,7 @@ middleware.ts            # Supabase session refresh på alle routes
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-OPENROUTER_API_KEY=
+GROQ_API_KEY=
 NVIDIA_API_KEY=
 USE_NVIDIA=false
 ```

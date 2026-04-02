@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Message } from '@/types'
+import { Message, Conversation } from '@/types'
+import { getSupabase } from '@/lib/supabase'
 
 const SYSTEM_PROMPT = `Du er en erfaren AI-automatiserings- og forretningskonsulent hos Lauto.
 Din opgave er at hjælpe med at identificere og diskutere løsninger på virksomheders procesudfordringer.
@@ -17,8 +18,13 @@ Fokuser på praktiske automation-løsninger som:
 Stil opklarende spørgsmål, identificér rodårsager og foreslå konkrete løsninger.
 Svar på dansk. Vær direkte og praktisk.`
 
-export default function IdeaGenerator() {
-  const [messages, setMessages] = useState<Message[]>([])
+interface Props {
+  onConversationSaved?: () => void
+  initialMessages?: Message[]
+}
+
+export default function IdeaGenerator({ onConversationSaved, initialMessages }: Props) {
+  const [messages, setMessages] = useState<Message[]>(initialMessages ?? [])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -65,7 +71,13 @@ export default function IdeaGenerator() {
     setLoading(false)
   }
 
-  function handleClear() {
+  async function handleClear() {
+    if (messages.length > 0) {
+      const firstUserMsg = messages.find((m) => m.role === 'user')?.content ?? 'Samtale'
+      const title = firstUserMsg.length > 70 ? firstUserMsg.slice(0, 70).trimEnd() + '…' : firstUserMsg
+      await getSupabase().from('conversations').insert({ title, messages })
+      onConversationSaved?.()
+    }
     setMessages([])
   }
 

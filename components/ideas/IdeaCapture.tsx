@@ -4,7 +4,11 @@ import { useState, useRef } from 'react'
 import { getSupabase } from '@/lib/supabase'
 import { Idea, IdeaEvaluation } from '@/types'
 
-export default function IdeaCapture() {
+interface Props {
+  onIdeaSaved?: () => void
+}
+
+export default function IdeaCapture({ onIdeaSaved }: Props) {
   const [recording, setRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [formatted, setFormatted] = useState('')
@@ -87,6 +91,7 @@ export default function IdeaCapture() {
     })
 
     setStage('done')
+    onIdeaSaved?.()
   }
 
   function reset() {

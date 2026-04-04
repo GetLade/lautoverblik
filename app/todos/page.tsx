@@ -38,6 +38,7 @@ export default function TodosPage() {
   const tabs: { label: string; value: TodoType }[] = [
     { label: 'Daglig', value: 'daily' },
     { label: 'Ugentlig', value: 'weekly' },
+    { label: 'Rettelser', value: 'fixes' },
   ]
 
   return (

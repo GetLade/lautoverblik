@@ -1,10 +1,12 @@
-export type TodoType = 'daily' | 'weekly'
+export type TodoType = 'daily' | 'weekly' | 'fixes'
+export type TodoPriority = 'high' | 'medium' | 'low'
 
 export interface Todo {
   id: string
   title: string
   type: TodoType
   completed: boolean
+  priority: TodoPriority
   created_at: string
 }
 

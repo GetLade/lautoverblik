@@ -2,13 +2,21 @@
 
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { Todo } from '@/types'
+import { Todo, TodoPriority } from '@/types'
 import { getSupabase } from '@/lib/supabase'
 
 interface Props {
   todo: Todo
   onDelete: (id: string) => void
   onUpdate: (updated: Todo) => void
+}
+
+const priorityCycle: TodoPriority[] = ['high', 'medium', 'low']
+
+const priorityStyles: Record<TodoPriority, { dot: string; title: string }> = {
+  high:   { dot: 'bg-red-500',    title: 'Høj prioritet' },
+  medium: { dot: 'bg-yellow-500', title: 'Mellem prioritet' },
+  low:    { dot: 'bg-white/30',   title: 'Lav prioritet' },
 }
 
 export default function TodoItem({ todo, onDelete, onUpdate }: Props) {
@@ -19,7 +27,6 @@ export default function TodoItem({ todo, onDelete, onUpdate }: Props) {
   async function handleToggle() {
     if (todo.completed) return
     setCompleting(true)
-    // Vent på at animationen er klar
     setTimeout(async () => {
       await getSupabase().from('todos').update({ completed: true }).eq('id', todo.id)
       onDelete(todo.id)
@@ -37,6 +44,15 @@ export default function TodoItem({ todo, onDelete, onUpdate }: Props) {
     await getSupabase().from('todos').delete().eq('id', todo.id)
     onDelete(todo.id)
   }
+
+  async function handleCyclePriority() {
+    const current = priorityCycle.indexOf(todo.priority)
+    const next = priorityCycle[(current + 1) % priorityCycle.length]
+    await getSupabase().from('todos').update({ priority: next }).eq('id', todo.id)
+    onUpdate({ ...todo, priority: next })
+  }
+
+  const ps = priorityStyles[todo.priority]
 
   return (
     <motion.li
@@ -63,6 +79,15 @@ export default function TodoItem({ todo, onDelete, onUpdate }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         )}
+      </button>
+
+      {/* Prioritets-prik */}
+      <button
+        onClick={handleCyclePriority}
+        title={ps.title}
+        className="flex-shrink-0 w-2.5 h-2.5 rounded-full transition-transform hover:scale-125"
+      >
+        <span className={`block w-2.5 h-2.5 rounded-full ${ps.dot}`} />
       </button>
 
       {/* Titel */}

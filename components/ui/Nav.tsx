@@ -8,6 +8,7 @@ const links = [
   { href: '/todos', label: 'Opgaver', emoji: '✅' },
   { href: '/idea-generator', label: 'Idégenerator', emoji: '🤖' },
   { href: '/idea-capture', label: 'Idé-capture', emoji: '🎤' },
+  { href: '/meetings', label: 'Møder', emoji: '📋' },
 ]
 
 export default function Nav() {

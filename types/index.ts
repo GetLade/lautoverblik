@@ -36,3 +36,30 @@ export interface Conversation {
   messages: Message[]
   created_at: string
 }
+
+export type MeetingKeyPointCategory = 'action' | 'decision' | 'note'
+
+export interface MeetingKeyPoint {
+  text: string
+  category: MeetingKeyPointCategory
+}
+
+export interface MeetingSpeakerSegment {
+  speaker: string
+  timestamp: string
+  text: string
+}
+
+export interface Meeting {
+  id: string
+  title: string
+  transcript: string
+  summary: string
+  key_points: MeetingKeyPoint[]
+  duration: number
+  created_at: string
+  corrected_transcript?: string
+  speaker_segments?: MeetingSpeakerSegment[]
+  goals_expectations?: string
+  next_steps?: string
+}

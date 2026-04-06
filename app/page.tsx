@@ -22,6 +22,13 @@ const features = [
     description: 'Indtal dine idéer – AI formaterer og vurderer dem',
     color: 'from-sky-500/10 to-sky-500/5 border-sky-500/20',
   },
+  {
+    href: '/meetings',
+    emoji: '📋',
+    title: 'Mødeoptager',
+    description: 'Optag møder – AI transskriberer og opsummerer automatisk',
+    color: 'from-amber-500/10 to-amber-500/5 border-amber-500/20',
+  },
 ]
 
 export default function Home() {

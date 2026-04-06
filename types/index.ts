@@ -50,6 +50,15 @@ export interface MeetingSpeakerSegment {
   text: string
 }
 
+export interface MeetingSalesAnalysis {
+  outcome: 'won' | 'lost' | 'pending'
+  outcome_summary: string
+  closing_blockers: string[]
+  strengths: string[]
+  improvements: string[]
+  score: number
+}
+
 export interface Meeting {
   id: string
   title: string
@@ -62,4 +71,5 @@ export interface Meeting {
   speaker_segments?: MeetingSpeakerSegment[]
   goals_expectations?: string
   next_steps?: string
+  sales_analysis?: MeetingSalesAnalysis
 }

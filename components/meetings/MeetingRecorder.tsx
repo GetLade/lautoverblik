@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabase } from '@/lib/supabase'
-import type { MeetingKeyPoint, MeetingSpeakerSegment } from '@/types'
+import type { MeetingKeyPoint, MeetingSalesAnalysis, MeetingSpeakerSegment } from '@/types'
 import { downloadMeetingPDF, formatDuration } from '@/lib/meetingPdf'
 
 type Stage = 'idle' | 'recording' | 'recorded' | 'transcribing' | 'analyzing' | 'done'
@@ -38,6 +38,7 @@ export default function MeetingRecorder({ onMeetingSaved }: Props) {
   const [speakerSegments, setSpeakerSegments] = useState<MeetingSpeakerSegment[]>([])
   const [goalsExpectations, setGoalsExpectations] = useState<string>('')
   const [nextSteps, setNextSteps] = useState<string>('')
+  const [salesAnalysis, setSalesAnalysis] = useState<MeetingSalesAnalysis | null>(null)
   const [showSpeakers, setShowSpeakers] = useState(false)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -181,6 +182,7 @@ export default function MeetingRecorder({ onMeetingSaved }: Props) {
       speaker_segments,
       goals_expectations,
       next_steps,
+      sales_analysis,
     } = await analyzeRes.json()
     setTitle(genTitle)
     setSummary(genSummary)
@@ -189,6 +191,7 @@ export default function MeetingRecorder({ onMeetingSaved }: Props) {
     setSpeakerSegments(speaker_segments ?? [])
     setGoalsExpectations(goals_expectations ?? '')
     setNextSteps(next_steps ?? '')
+    setSalesAnalysis(sales_analysis ?? null)
 
     // 3. Gem i Supabase
     const { data: saved } = await getSupabase()
@@ -203,6 +206,7 @@ export default function MeetingRecorder({ onMeetingSaved }: Props) {
         speaker_segments: speaker_segments ?? undefined,
         goals_expectations: goals_expectations ?? undefined,
         next_steps: next_steps ?? undefined,
+        sales_analysis: sales_analysis ?? undefined,
       })
       .select('id')
       .single()
@@ -226,6 +230,7 @@ export default function MeetingRecorder({ onMeetingSaved }: Props) {
     setSpeakerSegments([])
     setGoalsExpectations('')
     setNextSteps('')
+    setSalesAnalysis(null)
     setShowSpeakers(false)
     audioBlobRef.current = null
   }
@@ -244,6 +249,7 @@ export default function MeetingRecorder({ onMeetingSaved }: Props) {
       speaker_segments: speakerSegments.length > 0 ? speakerSegments : undefined,
       goals_expectations: goalsExpectations || undefined,
       next_steps: nextSteps || undefined,
+      sales_analysis: salesAnalysis || undefined,
     })
   }
 
@@ -394,6 +400,69 @@ export default function MeetingRecorder({ onMeetingSaved }: Props) {
               <div>
                 <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Næste skridt</p>
                 <p className="text-white/70 text-sm leading-relaxed">{nextSteps}</p>
+              </div>
+            )}
+
+            {/* Salgsvurdering */}
+            {salesAnalysis && (
+              <div className="border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-white/40 text-xs uppercase tracking-wider">Salgsvurdering</p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        salesAnalysis.outcome === 'won'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : salesAnalysis.outcome === 'lost'
+                          ? 'bg-red-500/20 text-red-400'
+                          : 'bg-amber-500/20 text-amber-400'
+                      }`}
+                    >
+                      {salesAnalysis.outcome === 'won' ? 'Vundet' : salesAnalysis.outcome === 'lost' ? 'Tabt' : 'Afventer'}
+                    </span>
+                    <span className="text-white/40 text-xs">{salesAnalysis.score}/10</span>
+                  </div>
+                </div>
+                <p className="text-white/70 text-sm leading-relaxed">{salesAnalysis.outcome_summary}</p>
+                {salesAnalysis.strengths.length > 0 && (
+                  <div>
+                    <p className="text-white/40 text-xs mb-1.5">Styrker</p>
+                    <ul className="space-y-1">
+                      {salesAnalysis.strengths.map((s, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-sm text-emerald-400/80">
+                          <span className="shrink-0 mt-0.5">+</span>
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {salesAnalysis.improvements.length > 0 && (
+                  <div>
+                    <p className="text-white/40 text-xs mb-1.5">Forbedringsområder</p>
+                    <ul className="space-y-1">
+                      {salesAnalysis.improvements.map((imp, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-sm text-amber-400/80">
+                          <span className="shrink-0 mt-0.5">→</span>
+                          <span>{imp}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {salesAnalysis.closing_blockers.length > 0 && (
+                  <div>
+                    <p className="text-white/40 text-xs mb-1.5">Lukning-blokkere</p>
+                    <ul className="space-y-1">
+                      {salesAnalysis.closing_blockers.map((b, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-sm text-red-400/80">
+                          <span className="shrink-0 mt-0.5">!</span>
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { getLLMClient, getModel } from '@/lib/llm'
-import type { MeetingKeyPoint, MeetingSpeakerSegment } from '@/types'
+import type { MeetingKeyPoint, MeetingSpeakerSegment, MeetingSalesAnalysis } from '@/types'
 
 const SYSTEM_PROMPT = `Du er en ekstremt præcis mødeanalyse-specialist.
 
@@ -29,8 +29,24 @@ Du returnerer KUN valid JSON – INTET ANDET:
     { "speaker": "Kunden", "timestamp": "0:45", "text": "<den fulde talte tekst>" }
   ],
   "goals_expectations": "<hvilke mål og forventninger blev diskuteret>",
-  "next_steps": "<klare næste skridt: møde planlagt?, tilbud sendes?, etc>"
+  "next_steps": "<klare næste skridt: møde planlagt?, tilbud sendes?, etc>",
+  "sales_analysis": {
+    "outcome": "won|lost|pending",
+    "outcome_summary": "<1-2 sætninger om mødets salgsmæssige udfald>",
+    "closing_blockers": ["<indvendinger, usikkerhed, pris, timing, konkurrenter der forhindrede lukning>"],
+    "strengths": ["<hvad gik godt: rapport-opbygning, behovsafdækning, præsentation, håndtering af indvendinger>"],
+    "improvements": ["<konkrete forbedringer til næste salgsmøde>"],
+    "score": <1-10>
+  }
 }
+
+VIGTIGT om sales_analysis:
+- outcome "won" = aftale/ordre blev bekræftet i mødet
+- outcome "lost" = kunden afviste eller sagde eksplicit nej
+- outcome "pending" = ingen klar beslutning endnu, sagen er åben
+- score baseres på salgsmæssig performance: behovsafdækning, præsentation, indvendingshåndtering, fremdrift
+- closing_blockers må gerne være tom liste hvis der ingen blokkere var
+- Baser alt på hvad der faktisk fremgår af transskriptet
 
 VIGTIGT om speaker_segments:
 - Alle segmenter tilsammen skal dække 100% af transskriptet
@@ -76,6 +92,7 @@ export async function POST(req: NextRequest) {
       speaker_segments?: MeetingSpeakerSegment[]
       goals_expectations?: string
       next_steps?: string
+      sales_analysis?: MeetingSalesAnalysis
     }
     try {
       parsed = JSON.parse(cleaned)

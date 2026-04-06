@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { getSupabase } from '@/lib/supabase'
-import type { Meeting, MeetingKeyPoint, MeetingSpeakerSegment } from '@/types'
+import type { Meeting, MeetingKeyPoint } from '@/types'
 import { downloadMeetingPDF, formatDuration } from '@/lib/meetingPdf'
 
 interface Props {
@@ -299,6 +299,69 @@ export default function MeetingHistory({ refreshTrigger }: Props) {
                         <p className="text-white/60 text-xs leading-relaxed">
                           {meeting.next_steps}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Salgsvurdering */}
+                    {meeting.sales_analysis && (
+                      <div className="border border-white/10 rounded-xl p-3 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <p className="text-white/40 text-xs uppercase tracking-wider">Salgsvurdering</p>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                meeting.sales_analysis.outcome === 'won'
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : meeting.sales_analysis.outcome === 'lost'
+                                  ? 'bg-red-500/20 text-red-400'
+                                  : 'bg-amber-500/20 text-amber-400'
+                              }`}
+                            >
+                              {meeting.sales_analysis.outcome === 'won' ? 'Vundet' : meeting.sales_analysis.outcome === 'lost' ? 'Tabt' : 'Afventer'}
+                            </span>
+                            <span className="text-white/40 text-xs">{meeting.sales_analysis.score}/10</span>
+                          </div>
+                        </div>
+                        <p className="text-white/60 text-xs leading-relaxed">{meeting.sales_analysis.outcome_summary}</p>
+                        {meeting.sales_analysis.strengths.length > 0 && (
+                          <div>
+                            <p className="text-white/40 text-xs mb-1">Styrker</p>
+                            <ul className="space-y-0.5">
+                              {meeting.sales_analysis.strengths.map((s, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-400/80">
+                                  <span className="shrink-0">+</span>
+                                  <span>{s}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {meeting.sales_analysis.improvements.length > 0 && (
+                          <div>
+                            <p className="text-white/40 text-xs mb-1">Forbedringsområder</p>
+                            <ul className="space-y-0.5">
+                              {meeting.sales_analysis.improvements.map((imp, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-amber-400/80">
+                                  <span className="shrink-0">→</span>
+                                  <span>{imp}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {meeting.sales_analysis.closing_blockers.length > 0 && (
+                          <div>
+                            <p className="text-white/40 text-xs mb-1">Lukning-blokkere</p>
+                            <ul className="space-y-0.5">
+                              {meeting.sales_analysis.closing_blockers.map((b, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-red-400/80">
+                                  <span className="shrink-0">!</span>
+                                  <span>{b}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     )}
 

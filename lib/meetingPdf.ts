@@ -1,4 +1,4 @@
-import type { Meeting, MeetingSpeakerSegment } from '@/types'
+import type { Meeting, MeetingSalesAnalysis, MeetingSpeakerSegment } from '@/types'
 
 export function formatDuration(secs: number): string {
   const m = Math.floor(secs / 60).toString().padStart(2, '0')
@@ -100,6 +100,69 @@ export async function downloadMeetingPDF(meeting: Meeting): Promise<void> {
     const nextLines = doc.splitTextToSize(meeting.next_steps, maxWidth)
     doc.text(nextLines, margin, y)
     y += nextLines.length * 5 + 10
+  }
+
+  // Salgsvurdering
+  if (meeting.sales_analysis) {
+    const sa: MeetingSalesAnalysis = meeting.sales_analysis
+    doc.setFontSize(13)
+    doc.setFont('helvetica', 'bold')
+    if (y > 260) { doc.addPage(); y = 20 }
+    doc.text('Salgsvurdering', margin, y)
+    y += 7
+
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    const outcomeLabel = sa.outcome === 'won' ? 'Vundet' : sa.outcome === 'lost' ? 'Tabt' : 'Afventer'
+    doc.text(`Resultat: ${outcomeLabel}  (score: ${sa.score}/10)`, margin, y)
+    y += 6
+
+    const summaryLines = doc.splitTextToSize(sa.outcome_summary, maxWidth)
+    doc.text(summaryLines, margin, y)
+    y += summaryLines.length * 5 + 5
+
+    if (sa.strengths.length > 0) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Styrker:', margin, y)
+      y += 5
+      doc.setFont('helvetica', 'normal')
+      for (const s of sa.strengths) {
+        if (y > 280) { doc.addPage(); y = 20 }
+        const lines = doc.splitTextToSize(`+ ${s}`, maxWidth - 4)
+        doc.text(lines, margin + 2, y)
+        y += lines.length * 5 + 2
+      }
+      y += 3
+    }
+
+    if (sa.improvements.length > 0) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Forbedringsomrader:', margin, y)
+      y += 5
+      doc.setFont('helvetica', 'normal')
+      for (const imp of sa.improvements) {
+        if (y > 280) { doc.addPage(); y = 20 }
+        const lines = doc.splitTextToSize(`-> ${imp}`, maxWidth - 4)
+        doc.text(lines, margin + 2, y)
+        y += lines.length * 5 + 2
+      }
+      y += 3
+    }
+
+    if (sa.closing_blockers.length > 0) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Lukning-blokkere:', margin, y)
+      y += 5
+      doc.setFont('helvetica', 'normal')
+      for (const b of sa.closing_blockers) {
+        if (y > 280) { doc.addPage(); y = 20 }
+        const lines = doc.splitTextToSize(`! ${b}`, maxWidth - 4)
+        doc.text(lines, margin + 2, y)
+        y += lines.length * 5 + 2
+      }
+      y += 3
+    }
+    y += 7
   }
 
   // Talersegmenter

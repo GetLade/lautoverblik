@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
 import Nav from '@/components/ui/Nav'
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
 export const metadata: Metadata = {
   title: 'LautoOverblik',
@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="da" className={`${geist.variable} h-full`}>
-      <body className="min-h-full bg-[#0a0a0f] text-white antialiased">
+    <html lang="da" className={`${inter.variable} h-full`}>
+      <body className="min-h-dvh text-[--text-primary] antialiased">
         <Nav />
-        <main>{children}</main>
+        <main className="pt-[57px]">{children}</main>
       </body>
     </html>
   )

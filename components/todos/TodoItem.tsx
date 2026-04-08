@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { Pencil, Trash2, Check } from 'lucide-react'
 import { Todo, TodoPriority } from '@/types'
 import { getSupabase } from '@/lib/supabase'
 
@@ -13,10 +14,10 @@ interface Props {
 
 const priorityCycle: TodoPriority[] = ['high', 'medium', 'low']
 
-const priorityStyles: Record<TodoPriority, { dot: string; title: string }> = {
-  high:   { dot: 'bg-red-500',    title: 'Høj prioritet' },
-  medium: { dot: 'bg-yellow-500', title: 'Mellem prioritet' },
-  low:    { dot: 'bg-white/30',   title: 'Lav prioritet' },
+const priorityConfig: Record<TodoPriority, { dot: string; ring: string; title: string }> = {
+  high:   { dot: 'bg-red-500',    ring: 'ring-red-500/30',    title: 'Høj prioritet' },
+  medium: { dot: 'bg-amber-400',  ring: 'ring-amber-400/30',  title: 'Mellem prioritet' },
+  low:    { dot: 'bg-[--text-muted]', ring: 'ring-white/10',  title: 'Lav prioritet' },
 }
 
 export default function TodoItem({ todo, onDelete, onUpdate }: Props) {
@@ -25,12 +26,12 @@ export default function TodoItem({ todo, onDelete, onUpdate }: Props) {
   const [completing, setCompleting] = useState(false)
 
   async function handleToggle() {
-    if (todo.completed) return
+    if (todo.completed || completing) return
     setCompleting(true)
     setTimeout(async () => {
       await getSupabase().from('todos').update({ completed: true }).eq('id', todo.id)
       onDelete(todo.id)
-    }, 600)
+    }, 500)
   }
 
   async function handleSaveEdit() {
@@ -52,78 +53,82 @@ export default function TodoItem({ todo, onDelete, onUpdate }: Props) {
     onUpdate({ ...todo, priority: next })
   }
 
-  const ps = priorityStyles[todo.priority]
+  const pc = priorityConfig[todo.priority]
 
   return (
     <motion.li
       layout
-      initial={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, y: -6 }}
       animate={
         completing
-          ? { opacity: 0, x: 120, backgroundColor: '#22c55e' }
-          : { opacity: 1, x: 0, backgroundColor: '#ffffff00' }
+          ? { opacity: 0, x: 40, scale: 0.97 }
+          : { opacity: 1, x: 0, scale: 1, y: 0 }
       }
-      exit={{ opacity: 0, x: 120 }}
-      transition={{ duration: 0.4 }}
-      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10 group"
+      exit={{ opacity: 0, x: 40, scale: 0.97 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-[--bg-surface] border border-[--border-subtle] hover:border-[--border-default] transition-colors duration-150"
     >
-      {/* Tjek-boks */}
+      {/* Checkbox */}
       <button
         onClick={handleToggle}
-        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-          completing ? 'bg-green-500 border-green-500' : 'border-white/30 hover:border-green-400'
-        }`}
+        aria-label="Marker som færdig"
+        className={`
+          w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
+          transition-all duration-150 cursor-pointer
+          ${completing
+            ? 'bg-emerald-500 border-emerald-500'
+            : 'border-[--border-default] hover:border-emerald-400 hover:bg-emerald-400/10'
+          }
+        `}
       >
-        {completing && (
-          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        )}
+        {completing && <Check size={10} strokeWidth={3} className="text-white" />}
       </button>
 
-      {/* Prioritets-prik */}
+      {/* Priority dot */}
       <button
         onClick={handleCyclePriority}
-        title={ps.title}
-        className="flex-shrink-0 w-2.5 h-2.5 rounded-full transition-transform hover:scale-125"
-      >
-        <span className={`block w-2.5 h-2.5 rounded-full ${ps.dot}`} />
-      </button>
+        title={pc.title}
+        aria-label={pc.title}
+        className={`flex-shrink-0 w-2 h-2 rounded-full ring-4 ${pc.dot} ${pc.ring} transition-transform duration-150 hover:scale-150 cursor-pointer`}
+      />
 
-      {/* Titel */}
+      {/* Title */}
       {editing ? (
         <input
           autoFocus
           value={editValue}
           onChange={e => setEditValue(e.target.value)}
           onBlur={handleSaveEdit}
-          onKeyDown={e => { if (e.key === 'Enter') handleSaveEdit(); if (e.key === 'Escape') setEditing(false) }}
-          className="flex-1 bg-transparent text-white outline-none border-b border-white/30 pb-0.5"
+          onKeyDown={e => {
+            if (e.key === 'Enter') handleSaveEdit()
+            if (e.key === 'Escape') setEditing(false)
+          }}
+          className="flex-1 bg-transparent text-[--text-primary] outline-none border-b border-[--border-default] pb-0.5 text-sm"
         />
       ) : (
         <span
-          className="flex-1 text-white/90 cursor-pointer"
+          className="flex-1 text-[--text-secondary] text-sm cursor-pointer select-none"
           onDoubleClick={() => setEditing(true)}
         >
           {todo.title}
         </span>
       )}
 
-      {/* Handlinger */}
-      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Actions */}
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <button
           onClick={() => setEditing(true)}
-          className="text-white/40 hover:text-white/80 transition-colors text-sm"
-          title="Rediger"
+          aria-label="Rediger opgave"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-[--text-muted] hover:text-[--text-secondary] hover:bg-white/5 transition-colors duration-150 cursor-pointer"
         >
-          ✏️
+          <Pencil size={13} />
         </button>
         <button
           onClick={handleDelete}
-          className="text-white/40 hover:text-red-400 transition-colors text-sm"
-          title="Slet"
+          aria-label="Slet opgave"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-[--text-muted] hover:text-red-400 hover:bg-red-400/10 transition-colors duration-150 cursor-pointer"
         >
-          🗑️
+          <Trash2 size={13} />
         </button>
       </div>
     </motion.li>

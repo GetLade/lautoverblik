@@ -16,10 +16,12 @@ export default function IdeaGeneratorPage() {
   }
 
   return (
-    <div className="px-4 py-8 h-[calc(100vh-80px)] flex flex-col">
-      <h1 className="text-2xl font-bold text-white mb-6">Idégenerator</h1>
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-6">
-        {/* Chat */}
+    <div className="px-4 py-10 h-[calc(100dvh-57px)] flex flex-col">
+      <div className="mb-6">
+        <p className="text-xs font-medium text-[--accent] uppercase tracking-wide mb-1.5">AI</p>
+        <h1 className="text-2xl font-semibold text-[--text-primary] tracking-tight">Idégenerator</h1>
+      </div>
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-4">
         <div className="flex-1 min-h-0 min-w-0">
           <IdeaGenerator
             key={generatorKey}
@@ -27,8 +29,7 @@ export default function IdeaGeneratorPage() {
             onConversationSaved={() => setRefreshTrigger((t) => t + 1)}
           />
         </div>
-        {/* Historik */}
-        <div className="w-full md:w-80 shrink-0 overflow-y-auto">
+        <div className="w-full md:w-72 shrink-0 overflow-y-auto">
           <ConversationHistory
             refreshTrigger={refreshTrigger}
             onLoad={handleLoad}

@@ -37,6 +37,55 @@ export interface Conversation {
   created_at: string
 }
 
+export type CustomerStatus = 'lead' | 'active' | 'inactive'
+
+export interface Customer {
+  id: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  company?: string | null
+  status: CustomerStatus
+  created_at: string
+}
+
+export interface CustomerRepo {
+  id: string
+  customer_id: string
+  repo_url: string
+  repo_name: string
+  description?: string | null
+  created_at: string
+}
+
+export interface CustomerNote {
+  id: string
+  customer_id: string
+  content: string
+  created_at: string
+}
+
+export interface CustomerFile {
+  id: string
+  customer_id: string
+  file_name: string
+  file_path: string
+  file_size?: number | null
+  mime_type?: string | null
+  created_at: string
+}
+
+export interface TimeEntry {
+  id: string
+  customer_id?: string | null
+  description: string
+  started_at: string
+  ended_at?: string | null
+  duration_seconds?: number | null
+  created_at: string
+  customer?: { name: string } | null
+}
+
 export type MeetingKeyPointCategory = 'action' | 'decision' | 'note'
 
 export interface MeetingKeyPoint {
